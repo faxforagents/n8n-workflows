@@ -1,0 +1,43 @@
+name: ci
+
+# Provenance: faxforagents/mcp/.github/workflows/ci.yml (2026-10-31), actions pinned by SHA.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  truthcheck:
+    name: truth pins
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: sh scripts/truthcheck.sh
+
+  workflow:
+    name: the JSON is what the builder writes and carries no credential
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: python3 scripts/check_workflow.py
+
+  import:
+    name: n8n imports the workflow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: import into a throwaway n8n
+        run: |
+          mkdir -p "$RUNNER_TEMP/n8n" && chmod 777 "$RUNNER_TEMP/n8n"
+          docker run --rm -u 1000:1000 -e N8N_ENCRYPTION_KEY=ci-only -e N8N_DIAGNOSTICS_ENABLED=false \
+            -v "$RUNNER_TEMP/n8n:/home/node/.n8n" -v "$PWD/workflows:/data:ro" \
+            docker.n8n.io/n8nio/n8n:latest import:workflow --input=/data/send-a-fax-with-human-approval.json
