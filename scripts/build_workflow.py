@@ -175,7 +175,7 @@ nodes = [
         "## After the send\n"
         "`queued` is not delivered. The workflow polls `GET /v1/faxes/{id}` every 10 seconds until the carrier answers. "
         "`delivered` carries the carrier's evidence. `partial` and `unknown` stop here and a person reconciles, nothing retransmits on its own.\n\n"
-        "Price card launch-v1, effective 2026-10-28: $0.039 per page sent, $0.019 per page received. "
+        "Price card launch-v2, effective 2026-10-31: $0.039 per page sent, $0.019 per page received. "
         "`amount_micro` is USD in micro-units (39000 is $0.039)."
     ), 760, 220),
 ]
